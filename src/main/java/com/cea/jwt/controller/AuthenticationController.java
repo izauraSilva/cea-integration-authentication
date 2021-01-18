@@ -7,22 +7,16 @@ import com.cea.jwt.model.Access;
 import com.cea.jwt.model.User;
 import com.cea.jwt.service.AccessService;
 import com.cea.jwt.service.UserService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Api(tags = {"AUTHENTICATION"})
 @SwaggerDefinition(tags = {
@@ -51,7 +45,7 @@ public class AuthenticationController {
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest jwtRequest, HttpServletRequest request) throws Exception {
 
-        Optional<Access> access =  accessService.getUser(jwtRequest.getUsername(), jwtRequest.getPassword());
+       Optional<Access> access =  accessService.getUser(jwtRequest.getUsername(), jwtRequest.getPassword());
 
         if(access.isPresent()){
             String token = jwtTokenUtil.generateToken(jwtRequest.getUsername());

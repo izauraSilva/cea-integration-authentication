@@ -2,6 +2,7 @@ package com.cea.jwt.model;
 
 import org.springframework.stereotype.Component;
 
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,6 +11,8 @@ public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@Id
+	private String id;
 	private String username;
 	private String perfil;
 	private String ip;
@@ -27,6 +30,14 @@ public class User implements Serializable {
 		this.token = token;
 		this.observation = observation;
 		this.dtGeneration = dtGeneration;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getUsername() {
