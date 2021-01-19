@@ -1,6 +1,7 @@
 package com.cea.jwt.controller;
 
 import com.cea.jwt.config.JwtTokenUtil;
+import com.cea.jwt.dao.ActiveDirectoryDAO;
 import com.cea.jwt.dto.JwtRequest;
 import com.cea.jwt.dto.JwtResponse;
 import com.cea.jwt.model.Access;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
 
@@ -33,6 +35,9 @@ public class AuthenticationController {
     UserService service;
 
     @Autowired
+    ActiveDirectoryDAO activeDirectoryDAO;
+
+    @Autowired
     private AccessService accessService;
 
     @ApiOperation(value = "Autenticação do usuário", notes = "Autenticação usuário, geração de token", response = User.class, responseContainer = "List" )
@@ -45,27 +50,14 @@ public class AuthenticationController {
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest jwtRequest, HttpServletRequest request) throws Exception {
 
-       Optional<Access> access =  accessService.getUser(jwtRequest.getUsername(), jwtRequest.getPassword());
+        String membersOf =  activeDirectoryDAO.getMembersOf(jwtRequest.getUsername(), request);
 
-        if(access.isPresent()){
+        if(membersOf!=null){
             String token = jwtTokenUtil.generateToken(jwtRequest.getUsername());
-            this.setRedis(jwtRequest.getUsername(), access.get().getPerfil(), request,token, "GENERATED TOKEN");
+            activeDirectoryDAO.setRedis(jwtRequest.getUsername(), membersOf.substring(membersOf.indexOf(";")+1), request,token, "GENERATED TOKEN", membersOf.substring(0,membersOf.lastIndexOf("]")+1));
             return new ResponseEntity<>(new JwtResponse(token), HttpStatus.CREATED);
-        } else {
-            this.setRedis(jwtRequest.getUsername(), null, request, null, "RESOURCE NOT FOUND - INVALID CREDENTIALS");
-            return new ResponseEntity<UserDetails>(HttpStatus.NOT_FOUND);
         }
-    }
 
-    private void setRedis(String username, String perfil ,HttpServletRequest request, String token, String observation) {
-
-        User user = new User(username,
-                perfil,
-                request.getRemoteAddr(),
-                token,
-                observation,
-                new Date());
-
-        service.save(user);
+        return null;
     }
 }

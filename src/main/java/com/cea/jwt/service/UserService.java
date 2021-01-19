@@ -28,7 +28,7 @@ public class UserService implements UserRepo {
 
 	@Override
 	public void save(final User user) {
-		hashOperations.put(USER_CACHE, user.getUsername(), user);
+		hashOperations.put(USER_CACHE, user.getLogin(), user);
 	}
 
 	@Override

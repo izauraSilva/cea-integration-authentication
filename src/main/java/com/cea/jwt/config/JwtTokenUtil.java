@@ -21,7 +21,9 @@ public class JwtTokenUtil implements Serializable {
     private String secret;
 
     public String generateToken(String username) {
+
         String secretKey = secret;
+
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("ROLE_USER");
 

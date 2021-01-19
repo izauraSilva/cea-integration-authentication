@@ -11,49 +11,41 @@ public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	private String id;
-	private String username;
-	private String perfil;
+	private String login;
+	private String nameUser;
 	private String ip;
 	private String token;
 	private String observation;
+	private String membersOf;
 	private Date dtGeneration;
 
 	public User() {
 	}
 
-	public User(String username, String perfil, String ip, String token, String observation, Date dtGeneration) {
-		this.username = username;
-		this.perfil = perfil;
+	public User(String login, String nameUser, String ip, String token, String observation, String membersOf, Date dtGeneration) {
+		this.login = login;
+		this.nameUser = nameUser;
 		this.ip = ip;
 		this.token = token;
 		this.observation = observation;
+		this.membersOf = membersOf;
 		this.dtGeneration = dtGeneration;
 	}
 
-	public String getId() {
-		return id;
+	public String getLogin() {
+		return login;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setLogin(String login) {
+		this.login = login;
 	}
 
-	public String getUsername() {
-		return username;
+	public String getNameUser() {
+		return nameUser;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPerfil() {
-		return perfil;
-	}
-
-	public void setPerfil(String perfil) {
-		this.perfil = perfil;
+	public void setNameUser(String nameUser) {
+		this.nameUser = nameUser;
 	}
 
 	public String getIp() {
@@ -78,6 +70,14 @@ public class User implements Serializable {
 
 	public void setObservation(String observation) {
 		this.observation = observation;
+	}
+
+	public String getMembersOf() {
+		return membersOf;
+	}
+
+	public void setMembersOf(String membersOf) {
+		this.membersOf = membersOf;
 	}
 
 	public Date getDtGeneration() {
