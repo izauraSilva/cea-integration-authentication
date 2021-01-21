@@ -50,7 +50,7 @@ public class AuthenticationController {
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest jwtRequest, HttpServletRequest request) throws Exception {
 
-        String membersOf =  activeDirectoryDAO.getMembersOf(jwtRequest.getUsername(), request);
+        String membersOf =  activeDirectoryDAO.getMembersOf(jwtRequest, request);
 
         if(membersOf!=null){
             String token = jwtTokenUtil.generateToken(jwtRequest.getUsername());

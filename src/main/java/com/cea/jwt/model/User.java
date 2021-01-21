@@ -16,19 +16,19 @@ public class User implements Serializable {
 	private String ip;
 	private String token;
 	private String observation;
-	private String membersOf;
+	private String roles;
 	private Date dtGeneration;
 
 	public User() {
 	}
 
-	public User(String login, String nameUser, String ip, String token, String observation, String membersOf, Date dtGeneration) {
+	public User(String login, String nameUser, String ip, String token, String observation, String roles, Date dtGeneration) {
 		this.login = login;
 		this.nameUser = nameUser;
 		this.ip = ip;
 		this.token = token;
 		this.observation = observation;
-		this.membersOf = membersOf;
+		this.roles = roles;
 		this.dtGeneration = dtGeneration;
 	}
 
@@ -72,12 +72,12 @@ public class User implements Serializable {
 		this.observation = observation;
 	}
 
-	public String getMembersOf() {
-		return membersOf;
+	public String getRoles() {
+		return roles;
 	}
 
-	public void setMembersOf(String membersOf) {
-		this.membersOf = membersOf;
+	public void setRoles(String roles) {
+		this.roles = roles;
 	}
 
 	public Date getDtGeneration() {

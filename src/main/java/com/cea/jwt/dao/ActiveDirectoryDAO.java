@@ -1,5 +1,7 @@
 package com.cea.jwt.dao;
 
+import com.cea.jwt.dto.JwtRequest;
+import com.cea.jwt.exception.UnauthorizedAuthenticationException;
 import com.cea.jwt.exception.UserNotFoundException;
 import com.cea.jwt.model.User;
 import com.cea.jwt.service.UserService;
@@ -15,6 +17,7 @@ import org.springframework.ldap.core.support.DefaultDirObjectFactory;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.ldap.filter.AndFilter;
 import org.springframework.ldap.filter.EqualsFilter;
+import org.springframework.ldap.filter.Filter;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,7 +53,10 @@ public class ActiveDirectoryDAO {
 	@Autowired
 	UserService service;
 
-	public String getMembersOf(String user, HttpServletRequest request ) {
+	public ActiveDirectoryDAO() {
+	}
+
+	public String getMembersOf(JwtRequest jwtRequest, HttpServletRequest request ) {
 
 		LdapContextSource sourceLdapCtx = new LdapContextSource();
 
@@ -65,11 +71,18 @@ public class ActiveDirectoryDAO {
 
 			LdapTemplate sourceLdapTemplate = new LdapTemplate(sourceLdapCtx);
 
-			return this.getMembersOf(user, sourceLdapTemplate);
+			Filter filter = new EqualsFilter("sAMAccountName", jwtRequest.getUsername());
+
+			if(!sourceLdapTemplate.authenticate("", filter.encode() , jwtRequest.getPassword())){
+				this.setRedis(jwtRequest.getUsername(), null, request, null, "Unauthorized authentication",null);
+				throw new UnauthorizedAuthenticationException("Erro na autenticação do usuário: " + jwtRequest.getUsername());
+			}
+
+			return this.getMembersOf(jwtRequest.getUsername(), sourceLdapTemplate);
 
 		} catch (UserNotFoundException e) {
-			this.setRedis(user, null, request, null, "USER NOT FOUND IN LDAP",null);
-			throw new UserNotFoundException("Usuário não autenticado: " + user);
+			this.setRedis(jwtRequest.getUsername(), null, request, null, "USER NOT FOUND IN LDAP",null);
+			throw new UserNotFoundException("Usuário não autenticado: " + jwtRequest.getUsername());
 		}
 
 	}
