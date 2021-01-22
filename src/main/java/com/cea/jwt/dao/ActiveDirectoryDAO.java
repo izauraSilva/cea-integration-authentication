@@ -47,8 +47,8 @@ public class ActiveDirectoryDAO {
 	@Value("${ldap.password}")
 	private String ldapPassword;
 
-	@Value("${ldap.teste}")
-	private String ldapTeste;
+	@Value("${ldap.amb}")
+	private String ldapAmb;
 
 	@Autowired
 	UserService service;
@@ -94,7 +94,7 @@ public class ActiveDirectoryDAO {
 			String nameUser = this.getPerson(user, sourceLdapTemplate);
 
 			ArrayList<?> membersOf = sourceLdapTemplate.search(
-					query().where("userPrincipalName").is(user.concat("@adh1.local")),
+					query().where("userPrincipalName").is(user.concat(ldapAmb)),
 					(AttributesMapper<ArrayList<?>>) attrs -> Collections.list(attrs.get("memberOf").getAll())
 			).get(0);
 
@@ -110,7 +110,7 @@ public class ActiveDirectoryDAO {
 	private String getPerson(String user, LdapTemplate sourceLdapTemplate) {
 
 		AndFilter andFilter = new AndFilter();
-		andFilter.and(new EqualsFilter("userPrincipalName", user.concat("@adh1.local")));
+		andFilter.and(new EqualsFilter("userPrincipalName", user.concat(ldapAmb)));
 
 		List<String> cn = sourceLdapTemplate.
 				search("", andFilter.toString(), (AttributesMapper<String>) attrs -> (String) attrs.get("cn").get());

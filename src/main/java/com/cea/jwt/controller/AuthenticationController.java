@@ -40,7 +40,7 @@ public class AuthenticationController {
     @Autowired
     private AccessService accessService;
 
-    @ApiOperation(value = "Autenticação do usuário", notes = "Autenticação usuário, geração de token", response = User.class, responseContainer = "List" )
+    @ApiOperation(value = "Autenticação do usuário", notes = "Autenticação usuário, geração de token", response = User.class )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Operação realizada com sucesso"),
             @ApiResponse(code = 201, message = "Novo recurso criado com sucesso"),
@@ -48,7 +48,7 @@ public class AuthenticationController {
             @ApiResponse(code = 403, message = "Acesso proibido"),
             @ApiResponse(code = 404, message = "Recurso não encontrado") })
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest jwtRequest, HttpServletRequest request) throws Exception {
+    public ResponseEntity<?> checkADAndGenerationToken(@RequestBody JwtRequest jwtRequest, HttpServletRequest request) throws Exception {
 
         String membersOf =  activeDirectoryDAO.getMembersOf(jwtRequest, request);
 
