@@ -32,9 +32,6 @@ public class AuthenticationController {
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    UserService service;
-
-    @Autowired
     ActiveDirectoryDAO activeDirectoryDAO;
 
     @Autowired

@@ -60,51 +60,48 @@ public class ActiveDirectoryDAO {
 
 		LdapContextSource sourceLdapCtx = new LdapContextSource();
 
-		try {
+		sourceLdapCtx.setUrl(ldapUrl);
+		sourceLdapCtx.setUserDn(ldapUserDn);
+		sourceLdapCtx.setBase(ldapBase);
+		sourceLdapCtx.setPassword(ldapPassword);
+		sourceLdapCtx.setDirObjectFactory(DefaultDirObjectFactory.class);
+		sourceLdapCtx.afterPropertiesSet();
 
-			sourceLdapCtx.setUrl(ldapUrl);
-			sourceLdapCtx.setUserDn(ldapUserDn);
-			sourceLdapCtx.setBase(ldapBase);
-			sourceLdapCtx.setPassword(ldapPassword);
-			sourceLdapCtx.setDirObjectFactory(DefaultDirObjectFactory.class);
-			sourceLdapCtx.afterPropertiesSet();
+		LdapTemplate sourceLdapTemplate = new LdapTemplate(sourceLdapCtx);
 
-			LdapTemplate sourceLdapTemplate = new LdapTemplate(sourceLdapCtx);
+		Filter filter = new EqualsFilter("sAMAccountName", jwtRequest.getUsername());
 
-			Filter filter = new EqualsFilter("sAMAccountName", jwtRequest.getUsername());
-
-			if(!sourceLdapTemplate.authenticate("", filter.encode() , jwtRequest.getPassword())){
-				this.setRedis(jwtRequest.getUsername(), null, request, null, "Unauthorized authentication",null);
-				throw new UnauthorizedAuthenticationException("Erro na autenticação do usuário: " + jwtRequest.getUsername());
-			}
-
-			return this.getMembersOf(jwtRequest.getUsername(), sourceLdapTemplate);
-
-		} catch (UserNotFoundException e) {
-			this.setRedis(jwtRequest.getUsername(), null, request, null, "USER NOT FOUND IN LDAP",null);
-			throw new UserNotFoundException("Usuário não autenticado: " + jwtRequest.getUsername());
+		if(!sourceLdapTemplate.authenticate("", filter.encode() , jwtRequest.getPassword())){
+			this.setRedis(jwtRequest.getUsername(), null, request, null, "Unauthorized authentication",null);
+			throw new UnauthorizedAuthenticationException("Erro na autenticação do usuário: " + jwtRequest.getUsername());
 		}
 
+		return this.getMembersOf(jwtRequest.getUsername(), sourceLdapTemplate, request);
 	}
 
-	private String getMembersOf(String user, LdapTemplate sourceLdapTemplate) {
+	private String getMembersOf(String user, LdapTemplate sourceLdapTemplate, HttpServletRequest request) {
 
-		try {
+		boolean isAllowedGroup = false;
 
-			String nameUser = this.getPerson(user, sourceLdapTemplate);
+		String nameUser = this.getPerson(user, sourceLdapTemplate);
 
-			ArrayList<?> membersOf = sourceLdapTemplate.search(
-					query().where("userPrincipalName").is(user.concat(ldapAmb)),
-					(AttributesMapper<ArrayList<?>>) attrs -> Collections.list(attrs.get("memberOf").getAll())
-			).get(0);
+		ArrayList<?> membersOf = sourceLdapTemplate.search(
+				query().where("userPrincipalName").is(user.concat(ldapAmb)),
+				(AttributesMapper<ArrayList<?>>) attrs -> Collections.list(attrs.get("memberOf").getAll())
+		).get(0);
 
-			return  membersOf.toString().concat(";").concat(nameUser);
-
-		} catch (Exception e) {
-			logger.error("====> Usuário não autenticado");
-			throw new UserNotFoundException("Usuário não autenticado: " + user);
+		for (Object group : membersOf) {
+			if(group.toString().contains("API_RH")){
+				if(group.toString().indexOf("CN=API_RH,") == 0) isAllowedGroup = true;
+			}
 		}
 
+		if(isAllowedGroup){
+			return  membersOf.toString().concat(";").concat(nameUser);
+		}
+
+		this.setRedis(user, null, request, null, "Unauthorized authentication",null);
+		throw new UserNotFoundException("Usuário não autenticado: " + user);
 	}
 
 	private String getPerson(String user, LdapTemplate sourceLdapTemplate) {
