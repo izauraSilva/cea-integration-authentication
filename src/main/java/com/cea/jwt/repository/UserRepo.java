@@ -1,15 +1,9 @@
 package com.cea.jwt.repository;
 
 import com.cea.jwt.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
-import java.util.Map;
-
-public interface UserRepo {
-
-	void save(User user);
-
-	User findById(String id);
-
-	Map<String, User> findAll();
+public interface UserRepo extends CrudRepository<User, Long> {
 
 }

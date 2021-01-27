@@ -4,21 +4,15 @@ import com.cea.jwt.config.JwtTokenUtil;
 import com.cea.jwt.dao.ActiveDirectoryDAO;
 import com.cea.jwt.dto.JwtRequest;
 import com.cea.jwt.dto.JwtResponse;
-import com.cea.jwt.model.Access;
 import com.cea.jwt.model.User;
 import com.cea.jwt.service.AccessService;
-import com.cea.jwt.service.UserService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
 
 @Api(tags = {"AUTHENTICATION"})
 @SwaggerDefinition(tags = {

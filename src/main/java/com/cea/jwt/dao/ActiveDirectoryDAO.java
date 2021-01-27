@@ -4,7 +4,7 @@ import com.cea.jwt.dto.JwtRequest;
 import com.cea.jwt.exception.UnauthorizedAuthenticationException;
 import com.cea.jwt.exception.UserNotFoundException;
 import com.cea.jwt.model.User;
-import com.cea.jwt.service.UserService;
+import com.cea.jwt.repository.UserRepo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ public class ActiveDirectoryDAO {
 	private String ldapAmb;
 
 	@Autowired
-	UserService service;
+	private UserRepo userRepo;
 
 	public ActiveDirectoryDAO() {
 	}
@@ -83,7 +83,7 @@ public class ActiveDirectoryDAO {
 
 		boolean isAllowedGroup = false;
 
-		String nameUser = this.getPerson(user, sourceLdapTemplate);
+		String nameUser = this.getPerson(user, sourceLdapTemplate, request);
 
 		ArrayList<?> membersOf = sourceLdapTemplate.search(
 				query().where("userPrincipalName").is(user.concat(ldapAmb)),
@@ -104,7 +104,7 @@ public class ActiveDirectoryDAO {
 		throw new UserNotFoundException("Usuário não autenticado: " + user);
 	}
 
-	private String getPerson(String user, LdapTemplate sourceLdapTemplate) {
+	private String getPerson(String user, LdapTemplate sourceLdapTemplate, HttpServletRequest request) {
 
 		AndFilter andFilter = new AndFilter();
 		andFilter.and(new EqualsFilter("userPrincipalName", user.concat(ldapAmb)));
@@ -112,7 +112,10 @@ public class ActiveDirectoryDAO {
 		List<String> cn = sourceLdapTemplate.
 				search("", andFilter.toString(), (AttributesMapper<String>) attrs -> (String) attrs.get("cn").get());
 
-		return cn.get(0);
+		if(cn.size()>0) return cn.get(0);
+
+		this.setRedis(user, null, request, null, "Unauthorized authentication",null);
+		throw new UserNotFoundException("Usuário não autenticado: " + user);
 	}
 
 	public void setRedis(String username, String perfil , HttpServletRequest request, String token, String observation, String membersOf) {
@@ -125,7 +128,7 @@ public class ActiveDirectoryDAO {
 				membersOf,
 				new Date());
 
-		service.save(user);
+		userRepo.save(user);
 	}
 
 }

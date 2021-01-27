@@ -1,16 +1,21 @@
 package com.cea.jwt.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
-@Component
-public class User implements Serializable {
+@RedisHash(value = "user")
+public class User  {
 
-	private static final long serialVersionUID = 1L;
-
+	@Id
+	@Indexed
+	private Long id;
 	private String login;
 	private String nameUser;
 	private String ip;
@@ -30,6 +35,14 @@ public class User implements Serializable {
 		this.observation = observation;
 		this.roles = roles;
 		this.dtGeneration = dtGeneration;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public String getLogin() {
